@@ -21,7 +21,7 @@ func (rep *repository) loadToCache() error {
 	defer rows.Close()
 	for rows.Next() {
 		p := models.Event{}
-		if err = rows.Scan(&p.UserId, &p.Date, &p.Event, &p.Description); err != nil {
+		if err := rows.Scan(&p.UserId, &p.Date, &p.Event, &p.Description); err != nil {
 			rep.lg.Error(err)
 			continue
 		}
@@ -44,7 +44,7 @@ func (rep *repository) GetEvents(user_id int, date string) ([]models.Event, erro
 			rep.lg.Error(err)
 			return nil, err
 		}
-		T2, err := time.Parse(layoutISO, dist[1])
+		T2, _ := time.Parse(layoutISO, dist[1])
 		if err != nil {
 			rep.lg.Error(err)
 			return nil, err
@@ -56,6 +56,7 @@ func (rep *repository) GetEvents(user_id int, date string) ([]models.Event, erro
 		}
 		return res, nil
 	}
+
 }
 
 func (rep *repository) Store(v models.Event) error {
@@ -84,9 +85,7 @@ func (rep *repository) Store(v models.Event) error {
 }
 
 func (rep *repository) UpdateEvent(user_id int, date string, event string, newValue models.Event) error {
-	query := fmt.Sprintf(`
-	with cte as (select * from events where user_id=%d and date='%s' and event='%s' limit 1) 
-	update events s set date='%s',event='%s',description='%s' from cte where cte.user_id=s.user_id`,
+	query := fmt.Sprintf("with cte as (select * from events where user_id=%d and date='%s' and event='%s' limit 1) update events s set date='%s',event='%s',description='%s' from cte where cte.id=s.id",
 		user_id, date, event, newValue.Date, newValue.Event, newValue.Description)
 	res, err := rep.db.Exec(query)
 	if err != nil {
