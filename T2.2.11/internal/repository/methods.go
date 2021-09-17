@@ -64,12 +64,12 @@ func (rep *repository) Store(v models.Event) error {
 	query := ""
 	query = fmt.Sprintf("call insert_into_events(%d, '%s', '%s','%s')",
 		ord.UserId, ord.Date, ord.Event, ord.Description)
-	res, err := rep.db.Exec(query)
+	ExecRes, err := rep.db.Exec(query)
 	if err != nil {
 		rep.lg.Error(err)
 		return err
 	}
-	rep.lg.Println(query, res, err)
+	rep.lg.Println(query, ExecRes, err)
 
 	var myord models.Event
 	myord.UserId = ord.UserId
@@ -87,7 +87,7 @@ func (rep *repository) Store(v models.Event) error {
 func (rep *repository) UpdateEvent(user_id int, date string, event string, newValue models.Event) error {
 	query := fmt.Sprintf("with cte as (select * from events where user_id=%d and date='%s' and event='%s' limit 1) update events s set date='%s',event='%s',description='%s' from cte where cte.id=s.id",
 		user_id, date, event, newValue.Date, newValue.Event, newValue.Description)
-	res, err := rep.db.Exec(query)
+	ExecRes, err := rep.db.Exec(query)
 	if err != nil {
 		rep.lg.Error(err)
 		return err
@@ -101,14 +101,14 @@ func (rep *repository) UpdateEvent(user_id int, date string, event string, newVa
 	}
 	rep.cache[user_id][newValue.Date] = append(rep.cache[user_id][newValue.Date], newValue)
 
-	rep.lg.Println(query, res, err)
+	rep.lg.Println(query, ExecRes, err)
 	return nil
 }
 
 func (rep *repository) Delete(user_id int, date string, event string) error {
 	query := fmt.Sprintf("delete from events where ctid in (select ctid from events where user_id=%d and date='%s' and event='%s' limit 1)  ",
 		user_id, date, event)
-	res, err := rep.db.Exec(query)
+	ExecRes, err := rep.db.Exec(query)
 	if err != nil {
 		rep.lg.Error(err)
 		return err
@@ -120,7 +120,7 @@ func (rep *repository) Delete(user_id int, date string, event string) error {
 			break
 		}
 	}
-	rep.lg.Println(query, res, err)
+	rep.lg.Println(query, ExecRes, err)
 	return nil
 }
 

@@ -19,8 +19,8 @@ func (s *server) MiddleWareLogging(next http.Handler) http.Handler {
 }
 
 func (s *server) CreateEvent(w http.ResponseWriter, r *http.Request) {
-	e := models.Event{}
-	b, err := io.ReadAll(r.Body)
+	event := models.Event{}
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -31,7 +31,7 @@ func (s *server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = json.Unmarshal(b, &e)
+	err = json.Unmarshal(bodyBytes, &event)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -42,12 +42,12 @@ func (s *server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if err = s.validator.Validate(e); err != nil {
+	if err = s.validator.Validate(event); err != nil {
 		s.lg.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = s.service.CreateEvent(e)
+	err = s.service.CreateEvent(event)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -58,11 +58,12 @@ func (s *server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
+
 }
 
 func (s *server) UpdateEvent(w http.ResponseWriter, r *http.Request) {
-	e := models.UpdateEventRequest{}
-	b, err := io.ReadAll(r.Body)
+	event := models.UpdateEventRequest{}
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -73,7 +74,7 @@ func (s *server) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = json.Unmarshal(b, &e)
+	err = json.Unmarshal(bodyBytes, &event)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -84,7 +85,7 @@ func (s *server) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = s.service.UpdateEvent(e.UserId, e.Date, e.Event, e.NewValue)
+	err = s.service.UpdateEvent(event.UserId, event.Date, event.Event, event.NewValue)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -97,7 +98,7 @@ func (s *server) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *server) DeleteEvent(w http.ResponseWriter, r *http.Request) {
-	e := models.DeleteEventRequest{}
+	event := models.DeleteEventRequest{}
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		s.lg.Error(err)
@@ -109,7 +110,7 @@ func (s *server) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = json.Unmarshal(b, &e)
+	err = json.Unmarshal(b, &event)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -120,7 +121,7 @@ func (s *server) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = s.service.DeleteEvent(e.UserId, e.Date, e.Event)
+	err = s.service.DeleteEvent(event.UserId, event.Date, event.Event)
 	if err != nil {
 		s.lg.Error(err)
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
@@ -135,15 +136,15 @@ func (s *server) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) EventsForDay(w http.ResponseWriter, r *http.Request) {
 	var err error
-	e := models.EventsForDate{}
+	event := models.EventsForDate{}
 	args := r.URL.Query()
-	e.UserId, err = strconv.Atoi(args.Get("user_id"))
+	event.UserId, err = strconv.Atoi(args.Get("user_id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	e.Date = args.Get("date")
-	if e.UserId < 1 {
+	event.Date = args.Get("date")
+	if event.UserId < 1 {
 		_, err = w.Write([]byte("{\"error\":" + "wrong UserId" + "}"))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -153,7 +154,7 @@ func (s *server) EventsForDay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var resp models.EventsForDateResponse
-	resp.Event, err = s.service.EventForDay(e.UserId, e.Date)
+	resp.Event, err = s.service.EventForDay(event.UserId, event.Date)
 	if err != nil {
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
 		if err != nil {
@@ -163,8 +164,8 @@ func (s *server) EventsForDay(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
-	resp.Date = e.Date
-	resp.UserId = e.UserId
+	resp.Date = event.Date
+	resp.UserId = event.UserId
 	if len(resp.Event) == 0 {
 		_, err = w.Write([]byte("{\"error\":" + "NotFound" + "}"))
 		if err != nil {
@@ -175,13 +176,13 @@ func (s *server) EventsForDay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := json.Marshal(resp)
+	respBody, err := json.Marshal(resp)
 	if err != nil {
 		s.lg.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	_, err = w.Write(b)
+	_, err = w.Write(respBody)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -190,15 +191,15 @@ func (s *server) EventsForDay(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) EventsForWeek(w http.ResponseWriter, r *http.Request) {
 	var err error
-	e := models.EventsForDate{}
+	event := models.EventsForDate{}
 	args := r.URL.Query()
-	e.UserId, err = strconv.Atoi(args.Get("user_id"))
+	event.UserId, err = strconv.Atoi(args.Get("user_id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	e.Date = args.Get("date")
-	if e.UserId < 1 {
+	event.Date = args.Get("date")
+	if event.UserId < 1 {
 		_, err = w.Write([]byte("{\"error\":" + "wrong UserId" + "}"))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -208,7 +209,7 @@ func (s *server) EventsForWeek(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var resp models.EventsForDateResponse
-	resp.Event, err = s.service.EventsForWeek(e.UserId, e.Date)
+	resp.Event, err = s.service.EventsForWeek(event.UserId, event.Date)
 	if err != nil {
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
 		if err != nil {
@@ -218,8 +219,8 @@ func (s *server) EventsForWeek(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
-	resp.Date = e.Date
-	resp.UserId = e.UserId
+	resp.Date = event.Date
+	resp.UserId = event.UserId
 	if len(resp.Event) == 0 {
 		_, err = w.Write([]byte("{\"error\":" + "NotFound" + "}"))
 		if err != nil {
@@ -245,15 +246,15 @@ func (s *server) EventsForWeek(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) EventsForMonth(w http.ResponseWriter, r *http.Request) {
 	var err error
-	e := models.EventsForDate{}
+	event := models.EventsForDate{}
 	args := r.URL.Query()
-	e.UserId, err = strconv.Atoi(args.Get("user_id"))
+	event.UserId, err = strconv.Atoi(args.Get("user_id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	e.Date = args.Get("date")
-	if e.UserId < 1 {
+	event.Date = args.Get("date")
+	if event.UserId < 1 {
 		_, err = w.Write([]byte("{\"error\":" + "wrong UserId" + "}"))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -263,7 +264,7 @@ func (s *server) EventsForMonth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var resp models.EventsForDateResponse
-	resp.Event, err = s.service.EventForMonth(e.UserId, e.Date)
+	resp.Event, err = s.service.EventForMonth(event.UserId, event.Date)
 	if err != nil {
 		_, err = w.Write([]byte("{\"error\":" + err.Error() + "}"))
 		if err != nil {
@@ -273,8 +274,8 @@ func (s *server) EventsForMonth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
-	resp.Date = e.Date
-	resp.UserId = e.UserId
+	resp.Date = event.Date
+	resp.UserId = event.UserId
 	if len(resp.Event) == 0 {
 		_, err = w.Write([]byte("{\"error\":" + "NotFound" + "}"))
 		if err != nil {
@@ -285,12 +286,12 @@ func (s *server) EventsForMonth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := json.Marshal(resp)
+	respBody, err := json.Marshal(resp)
 	if err != nil {
 		s.lg.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	_, err = w.Write(b)
+	_, err = w.Write(respBody)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

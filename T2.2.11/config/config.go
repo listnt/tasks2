@@ -20,11 +20,11 @@ func ParseConfig(path string) Config {
 	if err != nil {
 		fmt.Println(err)
 	}
-	p, err := io.ReadAll(jsonFile)
+	configBytes, err := io.ReadAll(jsonFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := json.Unmarshal(p, &cfg); err != nil {
+	if err := json.Unmarshal(configBytes, &cfg); err != nil {
 		fmt.Println("Wrong config")
 		os.Exit(1)
 	}
