@@ -3,33 +3,59 @@ package mymodule
 import (
 	"errors"
 	"strings"
+	"unicode/utf8"
 )
 
-func Unpack(st string) (string, error) {
-	if !validate(st) {
-		return "", errors.New("Wrong string")
-	}
-	runes := []rune(st)
-	var res string
-	if len(runes) > 0 {
-		res = string(runes[0])
-	}
-	for i := 1; i < len(st); i++ {
-		if (int(runes[i]) <= int(rune('9'))) && (int(runes[i]) >= int(rune('1'))) {
-			res += strings.Repeat(string(res[len(res)-1]), int(runes[i]-'0')-1)
-		} else {
-			res += string(runes[i])
-		}
-	}
-	return res, nil
+type UnpackerInterface interface {
+	Unpack(st string) (string, error)
 }
 
-func validate(st string) bool {
-	if len(st) == 0 {
+type unpacker struct{}
+
+func NewUnpacker() UnpackerInterface {
+	return &unpacker{}
+}
+
+func (un *unpacker) Unpack(stringToUnpack string) (string, error) {
+	if !un.validate(stringToUnpack) {
+		return "", errors.New("wrong string")
+	}
+	runes := []rune(stringToUnpack)
+	var builder strings.Builder
+	if len(runes) > 0 {
+		builder.WriteString(string(runes[0]))
+	}
+	for _, r := range runes {
+		if un.isRuneNumbersOfRepeat(r) {
+			numbersOfRepeat := int(r-'0') - 1
+			builder.WriteString(
+				strings.Repeat(
+					getLastSymbol(builder.String()), // последний символ
+					numbersOfRepeat,                 // столько раз
+				),
+			)
+		} else {
+			builder.WriteString(string(r))
+		}
+	}
+	return builder.String(), nil
+}
+
+func (unpacker *unpacker) isRuneNumbersOfRepeat(r rune) bool {
+	return int(r) <= int(rune('9')) && int(r) >= int(rune('1'))
+}
+
+func getLastSymbol(str string) string {
+	lastRuneIndex := utf8.RuneCountInString(str) - 1
+	return string(
+		[]rune(str)[lastRuneIndex],
+	)
+}
+
+func (unpacker *unpacker) validate(str string) bool {
+	if len(str) == 0 {
 		return true
 	}
-	if (int(st[0]) <= int(rune('9'))) && (int(st[0]) >= int(rune('0'))) {
-		return false
-	}
-	return true
+	runes := []rune(str)
+	return !unpacker.isRuneNumbersOfRepeat(runes[0]) // is FirstSymbol not number
 }

@@ -33,16 +33,6 @@ func merge(a, b <-chan int) <-chan int {
 	return c
 }
 func main() {
-	// d := make(chan int, 1)
-	// go func() {
-	// 	for {
-	// 		select {
-	// 		case v := <-d:
-	// 			fmt.Println("some ", v)
-	// 		}
-	// 	}
-	// }()
-	// close(d)
 	a := asChan(1, 3, 5, 7)
 	b := asChan(2, 4, 6, 8)
 	c := merge(a, b)

@@ -1,15 +1,25 @@
 package main
 
 import (
-	"github.com/listnt/tasks2/T2.2.8/mymodule"
 	"os"
 	"os/user"
+
+	"github.com/listnt/tasks2/T2.2.8/mymodule"
 )
 
-func main(){
-	pwd, _ := os.Getwd()
-	us,_:= user.Current()
-	name, _ := os.Hostname()
-	app := mymodule.MyTerminalNew(pwd,us.Name,name)
+func main() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	us, err := user.Current()
+	if err != nil {
+		return
+	}
+	name, err := os.Hostname()
+	if err != nil {
+		return
+	}
+	app := mymodule.MyTerminalNew(pwd, us.Name, name)
 	app.Main()
 }

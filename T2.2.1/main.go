@@ -1,10 +1,14 @@
 package main
 
 import (
-	"github.com/listnt/tasks2/T2.2.1/mymodule"
+	"fmt"
 	"os"
+
+	"github.com/listnt/tasks2/T2.2.1/mymodule"
 )
 
 func main() {
-	os.Exit( mymodule.Time())
+	Time := mymodule.NewTime()
+	fmt.Println(Time.Time())
+	os.Exit(1)
 }

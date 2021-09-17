@@ -6,3 +6,4 @@ drwxr-xr-x 7 user user 4096 янв 13 11:42 Lightworks
 drwxr-xr-x 8 user user 12288 янв 11 12:33 Pictures
 drwxr-xr-x 8 user user 12288 янв 11 12:33 Pictures
 drwxr-xr-x 8 user user 12288 янв 11 12:33 Pictures
+123

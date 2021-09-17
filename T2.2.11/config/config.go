@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -19,7 +20,10 @@ func ParseConfig(path string) Config {
 	if err != nil {
 		fmt.Println(err)
 	}
-	p, _ := io.ReadAll(jsonFile)
+	p, err := io.ReadAll(jsonFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err := json.Unmarshal(p, &cfg); err != nil {
 		fmt.Println("Wrong config")
 		os.Exit(1)

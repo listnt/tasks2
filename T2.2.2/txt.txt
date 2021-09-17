@@ -1,0 +1,5 @@
+aaaabccddddde <nil>
+abcd <nil>
+ Wrong string
+ <nil>
+фФФФФФДiiy <nil>

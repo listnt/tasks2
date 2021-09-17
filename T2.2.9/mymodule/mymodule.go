@@ -8,32 +8,36 @@ import (
 	"os"
 )
 
-func WGet(url string,output string) error {
+func WGet(url string, outputName string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 	defer resp.Body.Close()
-	var f *os.File
-	if output!=""{
-		f,err=os.Create(output)
-		if err!=nil{
-			fmt.Println(err)
-			return err
+
+	outputFile, err := getOutputFile(outputName, resp.Header.Get("Content-Type"))
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, resp.Body)
+	return err
+}
+
+func getOutputFile(fileName string, contentType string) (outputFile *os.File, err error) {
+	if fileName == "" {
+		fileName = "res"
+		var arr []string
+		arr, err = mime.ExtensionsByType(contentType)
+		if err != nil {
+			return
 		}
-		defer f.Close()
-	} else{
-		arr,_:=mime.ExtensionsByType(resp.Header.Get("Content-Type"))
-		if len(arr)>0{
-			f,err=os.Create("res"+arr[0])
-			if err!=nil{
-				fmt.Println(err)
-				return err
-			}
-			defer f.Close()
+		if len(arr) > 0 {
+			fileName += arr[0]
 		}
 	}
-	_, err = io.Copy(f,resp.Body)
-	return err
+
+	outputFile, err = os.Create(fileName)
+	return
 }

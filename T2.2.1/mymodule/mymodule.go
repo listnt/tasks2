@@ -1,19 +1,48 @@
 package mymodule
 
 import (
-	"fmt"
+	"errors"
+
 	"github.com/beevik/ntp"
-	"os"
 )
 
-func Time() int{
-	time, err := ntp.Time("time.nist.gov")
-	if err != nil {
-		os.Stderr.Write([]byte(err.Error()))
-		return 2
+type Time interface {
+	Time() (string, error)
+	SetLayout(layout string)
+	SetServer(server string)
+}
+
+// layout of time representation
+const (
+	defaultServer = "time.nist.gov"
+	defaultLayout = "3:04:05 PM (MST) on Monday, January _2, 2006"
+)
+
+type time struct {
+	timeServer string
+	layout     string
+}
+
+func NewTime() Time {
+	return &time{
+		timeServer: defaultServer,
+		layout:     defaultLayout,
 	}
-	const layout = "3:04:05 PM (MST) on Monday, January _2, 2006"
-	fmt.Println("Current Local Time:")
-	fmt.Println(time.Local().Format(layout))
-	return 1
+}
+
+// Return
+func (t *time) Time() (string, error) {
+	time, err := ntp.Time(t.timeServer)
+	if err != nil {
+		return "", errors.New("wrong server")
+	}
+	return time.Local().Format(t.layout), nil
+}
+
+func (t *time) SetLayout(layout string) {
+	t.layout = layout
+}
+
+func (t *time) SetServer(server string) {
+	t.timeServer = server
 }

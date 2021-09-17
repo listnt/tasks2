@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	flgs := mymodule.My_flags{}
+	flgs := mymodule.MyFlags{}
 	F := flag.Int("f", -1, "выбрать поля (колонки)")
 	D := flag.String("d", "\t", "использовать другой разделитель")
 	S := flag.Bool("s", false, "только строки с разделителем")
@@ -21,14 +21,25 @@ func main() {
 	flgs.S = *S
 
 	var data []byte
+	var err error
 	if !term.IsTerminal(0) {
-		data, _ = ioutil.ReadAll(os.Stdin)
+		data, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Print(err)
+			return
+		}
 	} else {
 		if len(flag.Args()) > 0 {
-			data, _ = os.ReadFile(flag.Args()[0])
+			data, err = os.ReadFile(flag.Args()[0])
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		} else {
 			fmt.Println("No data")
 		}
 	}
-	fmt.Println( mymodule.Cut(string(data), flgs))
+	cut := mymodule.NewCut()
+	cut.SetFlags(flgs)
+	fmt.Println(cut.Cut(string(data)))
 }

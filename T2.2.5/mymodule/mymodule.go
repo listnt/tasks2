@@ -1,14 +1,13 @@
 package mymodule
 
 import (
-	"fmt"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 )
 
-type My_flags struct {
+type MyFlags struct {
 	A  int
 	B  int
 	C  int
@@ -19,20 +18,79 @@ type My_flags struct {
 	Nn bool
 }
 
-func Grep(st string, req string, flags My_flags) string {
-	if flags.F {
-		req = regexp.QuoteMeta(req)
+type Grep interface {
+	Grep(st string, req string) string
+	SetFlags(flags MyFlags)
+
+	proceedRegFlags(req string) (*regexp.Regexp, error)
+}
+
+type grep struct {
+	flags MyFlags
+}
+
+func NewGrep() Grep {
+	return &grep{
+		MyFlags{
+			A:  0,
+			B:  0,
+			C:  0,
+			Cc: false,
+			Ii: false,
+			Vv: false,
+			F:  false,
+			Nn: false,
+		},
 	}
-	if flags.Ii {
-		req = "(?i)" + req
-	}
-	reg, err := regexp.Compile(req)
+}
+
+func (gr *grep) SetFlags(flags MyFlags) {
+	gr.flags = flags
+}
+
+func (gr *grep) Grep(st string, req string) string {
+	reg, err := gr.proceedRegFlags(req)
 	if err != nil {
-		fmt.Println(err)
+		return ""
 	}
 	lines := strings.Split(st, "\n")
-	var outlines []int
-	CharsOnLine := make(map[int][][]int)
+	outlines, CharsOnLine := linesAndCharsOnThatLines(lines, reg)
+	if outlines == nil {
+		return ""
+	}
+
+	if gr.flags.Vv {
+		outlines = gr.proceedVvFlag(lines, CharsOnLine)
+	}
+
+	if gr.flags.Cc {
+		return strconv.Itoa(len(outlines))
+	}
+
+	// Блок обработки флагов -A -B -C
+	outlines = gr.proceedABCFlag(lines, outlines)
+	// Сортируем полученные строки из предыдущего блока и удаляем дубликаты
+	sort.Ints(outlines)
+	outlines = gr.removeDuplicates(outlines)
+
+	// Блок печати
+	res := gr.getOutputstring(lines, outlines, CharsOnLine)
+	return res
+}
+
+func (gr *grep) proceedRegFlags(req string) (*regexp.Regexp, error) {
+	//Блок обработки флагов связанных с регулярками
+	if gr.flags.F {
+		req = regexp.QuoteMeta(req)
+	}
+	if gr.flags.Ii {
+		req = "(?i)" + req
+	}
+	return regexp.Compile(req)
+}
+
+func linesAndCharsOnThatLines(lines []string, reg *regexp.Regexp) (outlines []int, CharsOnLine map[int][][]int) {
+	CharsOnLine = make(map[int][][]int)
 	for i := 0; i < len(lines); i++ {
 		res := reg.FindAllIndex([]byte(lines[i]), -1)
 		if res != nil {
@@ -40,40 +98,36 @@ func Grep(st string, req string, flags My_flags) string {
 			CharsOnLine[i] = res
 		}
 	}
-	if outlines == nil {
-		return ""
-	}
+	return
+}
 
-	if flags.Vv {
-		outlines = nil
-		for i := 0; i < len(lines); i++ {
-			if CharsOnLine[i] != nil {
-				continue
-			}
-			outlines = append(outlines, i)
+func (gr *grep) proceedVvFlag(allLines []string, CharsOnLine map[int][][]int) []int {
+	var outlines []int
+	for i := 0; i < len(allLines); i++ {
+		if CharsOnLine[i] != nil {
+			continue
 		}
+		outlines = append(outlines, i)
 	}
+	return outlines
+}
 
-	if flags.Cc {
-		return strconv.Itoa(len(outlines))
-	}
-
-	// Блок обработки флагов -A -B -C
+func (gr *grep) proceedABCFlag(allLines []string, outlines []int) []int {
 	var reslines []int
 	reslines = outlines
 	for i := 0; i < len(outlines); i++ {
-		for j := 1; j <= flags.A; j++ {
+		for j := 1; j <= gr.flags.A; j++ {
 			if outlines[i]-j > -1 {
 				reslines = append(reslines, outlines[i]-j)
 			}
 		}
-		for j := 1; j <= flags.B; j++ {
-			if outlines[i]+j < len(lines) {
+		for j := 1; j <= gr.flags.B; j++ {
+			if outlines[i]+j < len(allLines) {
 				reslines = append(reslines, outlines[i]+j)
 			}
 		}
-		for j := 1; j <= flags.C; j++ {
-			if outlines[i]+j < len(lines) {
+		for j := 1; j <= gr.flags.C; j++ {
+			if outlines[i]+j < len(allLines) {
 				reslines = append(reslines, outlines[i]+j)
 			}
 			if outlines[i]-j > -1 {
@@ -81,33 +135,36 @@ func Grep(st string, req string, flags My_flags) string {
 			}
 		}
 	}
+	return reslines
+}
 
-	// Сортируем полученные строки из предыдущего блока и удаляем дубликаты
-	sort.Ints(reslines)
+func (gr *grep) removeDuplicates(outlines []int) []int {
 	n := 1
-	for i := 1; i < len(reslines); i++ {
-		if reslines[i] != reslines[n-1] {
-			reslines[n] = reslines[i]
+	for i := 1; i < len(outlines); i++ {
+		if outlines[i] != outlines[n-1] {
+			outlines[n] = outlines[i]
 			n++
 		}
 	}
-	reslines = reslines[:n]
-	res := ""
-	// Блок печати
-	for _, i := range reslines {
+	outlines = outlines[:n]
+	return outlines
+}
+
+func (gt *grep) getOutputstring(allLines []string, outlines []int, CharsOnLine map[int][][]int) (res string) {
+	for _, i := range outlines {
 		if CharsOnLine[i] != nil {
-			str1 := lines[i][:CharsOnLine[i][0][0]]
+			str1 := allLines[i][:CharsOnLine[i][0][0]]
 			for j := 0; j < len(CharsOnLine[i]); j++ {
-				str1 += "\033[31m" + lines[i][CharsOnLine[i][j][0]:CharsOnLine[i][j][1]] + "\033[0m"
+				str1 += "\033[31m" + allLines[i][CharsOnLine[i][j][0]:CharsOnLine[i][j][1]] + "\033[0m"
 				if j != len(CharsOnLine[i])-1 {
-					str1 += lines[i][CharsOnLine[i][j][1]:CharsOnLine[i][j+1][0]]
+					str1 += allLines[i][CharsOnLine[i][j][1]:CharsOnLine[i][j+1][0]]
 				}
 			}
-			str1 += lines[i][CharsOnLine[i][len(CharsOnLine[i])-1][1]:]
-			lines[i] = str1
+			str1 += allLines[i][CharsOnLine[i][len(CharsOnLine[i])-1][1]:]
+			allLines[i] = str1
 		}
-		res += lines[i] + "\n"
+		res += allLines[i] + "\n"
 	}
-	res=res[:len(res)-1]
-	return res
+	res = res[:len(res)-1]
+	return
 }

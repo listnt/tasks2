@@ -1,24 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
+	"time"
 )
 
-func main(){
-	reader:=bufio.NewReader(os.Stdin)
-	fmt.Println("some")
-	for{
-		text,err:=reader.ReadString('\n')
-		if err!=nil{
-			fmt.Println(err)
-			break
-		}
-
-		text=strings.TrimSpace(text)
-		fmt.Println("writing:",text)
-	}
-
+func main() {
+	time.Sleep(time.Second * 2)
+	fmt.Println("exit")
 }

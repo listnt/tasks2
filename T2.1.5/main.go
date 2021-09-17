@@ -1,7 +1,6 @@
 package main
 
 func main() {
-
 	cashier := &cashier{}
 
 	//Set next for medical department

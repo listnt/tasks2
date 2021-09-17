@@ -4,24 +4,54 @@ import (
 	"strings"
 )
 
-type My_flags struct {
+type MyFlags struct {
 	F int
 	D string
 	S bool
 }
 
-func Cut(st string, flags My_flags) string{
+type Cut interface {
+	Cut(st string) string
+	SetFlags(flags MyFlags)
+}
+
+type cut struct {
+	flags MyFlags
+}
+
+func NewCut() Cut {
+	return &cut{
+		MyFlags{
+			F: -1,
+			D: "\t",
+			S: false,
+		},
+	}
+}
+
+func (c *cut) SetFlags(flags MyFlags) {
+	c.flags = flags
+}
+
+func (c *cut) Cut(st string) string {
 	lines := strings.Split(st, "\n")
-	res:=""
+	result := ""
 	for _, line := range lines {
-		collums := strings.Split(line, flags.D)
-		if len(collums) < 2 && flags.S {
-			continue
+		collums := strings.Split(line, c.flags.D)
+		if c.flags.S {
+			if !c.isLineHaveDelimeter(line, c.flags.D) {
+				continue
+			}
 		}
-		if flags.F < len(collums) && flags.F > -1 {
-			res +=strings.TrimSpace( collums[flags.F])+"\n"
+		if c.flags.F < len(collums) && c.flags.F > -1 {
+			result += strings.TrimSpace(collums[c.flags.F]) + "\n"
 		}
 	}
-	res=strings.TrimSpace(res)
-	return res
+	result = strings.TrimSpace(result)
+	return result
+}
+
+func (c *cut) isLineHaveDelimeter(str string, delimeter string) bool {
+	columns := strings.Split(str, c.flags.D)
+	return len(columns) < 2
 }

@@ -25,30 +25,40 @@ func sortString(s string) string {
 	return string(r)
 }
 
-func Annagrams(st *[]string) *map[string][]string {
-	res := make(map[string][]string)
-	keys := make(map[string]string)
-	for i := 0; i < len(*st); i++ {
-		k := sortString(strings.ToLower((*st)[i]))
-		if keys[k] == "" {
-			keys[k] = strings.ToLower((*st)[i])
+func Annagrams(strArray *[]string) *map[string][]string {
+	annagrams := make(map[string][]string)
+	keysToAnnagrams := make(map[string]string)
+	for _, word := range *strArray {
+		sortedWord := sortString(strings.ToLower(word))
+		if keysToAnnagrams[sortedWord] == "" {
+			keysToAnnagrams[sortedWord] = strings.ToLower(word)
 		}
-		res[keys[k]] = append(res[keys[k]], strings.ToLower((*st)[i]))
+		annagrams[keysToAnnagrams[sortedWord]] = append(annagrams[keysToAnnagrams[sortedWord]], strings.ToLower(word))
 	}
-	for k, v := range res {
-		if len(res[k]) == 1 {
-			delete(res, k)
+	for k, v := range annagrams {
+		if len(annagrams[k]) == 1 {
+			removeSingeElementKey(k, annagrams)
 			continue
 		}
 		sort.Strings(v)
-		n := 1
-		for i := 1; i < len(v); i++ {
-			if v[i] != v[n-1] {
-				v[n] = v[i]
-				n++
-			}
-		}
-		res[k] = v[:n]
+		annagrams[k] = removeDuplicates(v)
 	}
-	return &res
+	return &annagrams
+}
+
+func removeSingeElementKey(key string, mp map[string][]string) {
+	if len(mp[key]) == 1 {
+		delete(mp, key)
+	}
+}
+
+func removeDuplicates(strArray []string) []string {
+	n := 1
+	for i := 1; i < len(strArray); i++ {
+		if strArray[i] != strArray[n-1] {
+			strArray[n] = strArray[i]
+			n++
+		}
+	}
+	return strArray[:n]
 }

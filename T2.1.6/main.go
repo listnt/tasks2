@@ -3,8 +3,16 @@ package main
 import "fmt"
 
 func main() {
-	ak47, _ := getGun("ak47")
-	musket, _ := getGun("musket")
+	ak47, err := getGun("ak47")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	musket, err := getGun("musket")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	printDetails(ak47)
 	printDetails(musket)
