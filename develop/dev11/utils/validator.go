@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/listnt/tasks2/T2.2.11/internal/models"
+	"github.com/listnt/tasks2/develop/dev11/internal/models"
 )
 
 const (

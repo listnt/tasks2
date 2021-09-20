@@ -4,7 +4,7 @@ import (
 	"os"
 	"os/user"
 
-	"github.com/listnt/tasks2/T2.2.8/mymodule"
+	"github.com/listnt/tasks2/develop/dev08/mymodule"
 )
 
 func main() {

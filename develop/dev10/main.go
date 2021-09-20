@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/listnt/tasks2/T2.2.10/mymodule"
+	"github.com/listnt/tasks2/develop/dev10/mymodule"
 )
 
 func main() {

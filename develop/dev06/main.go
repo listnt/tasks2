@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/listnt/tasks2/T2.2.6/mymodule"
+	"github.com/listnt/tasks2/develop/dev06/mymodule"
 	"golang.org/x/term"
 )
 

@@ -3,9 +3,9 @@ package internal
 import (
 	"time"
 
-	Config "github.com/listnt/tasks2/T2.2.11/config"
-	"github.com/listnt/tasks2/T2.2.11/internal/models"
-	"github.com/listnt/tasks2/T2.2.11/internal/repository"
+	Config "github.com/listnt/tasks2/develop/dev11/config"
+	"github.com/listnt/tasks2/develop/dev11/internal/models"
+	"github.com/listnt/tasks2/develop/dev11/internal/repository"
 	"github.com/sirupsen/logrus"
 )
 

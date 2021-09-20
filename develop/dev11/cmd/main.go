@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/listnt/tasks2/T2.2.11/cmd/route"
+	"github.com/listnt/tasks2/develop/dev11/cmd/route"
 	"github.com/sirupsen/logrus"
 )
 

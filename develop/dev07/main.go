@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/listnt/tasks2/T2.2.7/mymodule"
+	"github.com/listnt/tasks2/develop/dev07/mymodule"
 )
 
 func main() {

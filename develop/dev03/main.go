@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/listnt/tasks2/T2.2.3/mymodule"
+	"github.com/listnt/tasks2/develop/dev03/mymodule"
 )
 
 func main() {

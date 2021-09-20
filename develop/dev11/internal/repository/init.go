@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq" //Postgres
-	Config "github.com/listnt/tasks2/T2.2.11/config"
-	"github.com/listnt/tasks2/T2.2.11/internal/models"
-	"github.com/listnt/tasks2/T2.2.11/utils"
+	Config "github.com/listnt/tasks2/develop/dev11/config"
+	"github.com/listnt/tasks2/develop/dev11/internal/models"
+	"github.com/listnt/tasks2/develop/dev11/utils"
 	"github.com/sirupsen/logrus"
 )
 

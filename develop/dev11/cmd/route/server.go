@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	Config "github.com/listnt/tasks2/T2.2.11/config"
-	Service "github.com/listnt/tasks2/T2.2.11/internal"
-	"github.com/listnt/tasks2/T2.2.11/utils"
+	Config "github.com/listnt/tasks2/develop/dev11/config"
+	Service "github.com/listnt/tasks2/develop/dev11/internal"
+	"github.com/listnt/tasks2/develop/dev11/utils"
 	"github.com/sirupsen/logrus"
 )
 
