@@ -1,4 +1,4 @@
-module github.com/listnt/tasks2/T2.2.1/mymodule
+module github.com/listnt/tasks2/dev01/mymodule
 
 go 1.16
 
