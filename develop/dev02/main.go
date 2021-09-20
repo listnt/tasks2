@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/listnt/tasks2/T2.2.2/mymodule"
+	"github.com/listnt/tasks2/develop/dev02/mymodule"
 )
 
 func main() {

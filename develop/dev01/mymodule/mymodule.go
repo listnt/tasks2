@@ -14,7 +14,7 @@ type Time interface {
 
 // layout of time representation
 const (
-	defaultServer = "time.nist.gov"
+	defaultServer = "0.beevik-ntp.pool.ntp.org"
 	defaultLayout = "3:04:05 PM (MST) on Monday, January _2, 2006"
 )
 
