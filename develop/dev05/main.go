@@ -61,6 +61,7 @@ func main() {
 			}
 		} else {
 			fmt.Println("No data: you forgot to write searched string or filename")
+			return
 		}
 	}
 	gr := mymodule.NewGrep()
