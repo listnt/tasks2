@@ -1,7 +1,0 @@
-Winter: white: snow: frost
-Some string
-Spring: green: grass: warm
-Summer: colorful: blossom: hot
-Error string
-Autumn: yellow: leaves: cool
-Empty string
