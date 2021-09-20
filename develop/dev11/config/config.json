@@ -1,0 +1,3 @@
+{
+    "db_conn": "user=postgres password=postgres dbname=events sslmode=disable"
+}
